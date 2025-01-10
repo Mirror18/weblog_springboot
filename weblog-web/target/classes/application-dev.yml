@@ -34,4 +34,6 @@ minio:
   accessKey: mirror
   secretKey: makai2001
   bucketName: weblog
-
+server:
+  port: 8081
+  
