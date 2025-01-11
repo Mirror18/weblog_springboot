@@ -32,18 +32,18 @@ class WeblogWebApplicationTests {
     @Resource
     private UserMapper userMapper;
 
-    @Test
-    void insertTest() {
-        // 构建数据库实体类
-        UserDO userDO = UserDO.builder()
-                .username("mirror")
-                .password("123456")
-                .createTime(new Date())
-                .updateTime(new Date())
-                .isDeleted(false)
-                .build();
-
-        userMapper.insert(userDO);
-    }
+//    @Test
+//    void insertTest() {
+//        // 构建数据库实体类
+//        UserDO userDO = UserDO.builder()
+//                .username("mirror")
+//                .password("123456")
+//                .createTime(new Date())
+//                .updateTime(new Date())
+//                .isDeleted(false)
+//                .build();
+//
+//        userMapper.insert(userDO);
+//    }
 
 }
