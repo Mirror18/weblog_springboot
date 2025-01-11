@@ -23,6 +23,9 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
+/**
+ * @author mirror
+ */
 @Service
 @Slf4j
 public class ArchiveServiceImpl implements ArchiveService {
@@ -42,7 +45,7 @@ public class ArchiveServiceImpl implements ArchiveService {
         Long size = findArchiveArticlePageListReqVO.getSize();
 
         // 分页查询
-        IPage<ArticleDO> page = articleMapper.selectPageList(current, size, null, null, null);
+        IPage<ArticleDO> page = articleMapper.selectPageList(current, size, null, null, null, null);
         List<ArticleDO> articleDOS = page.getRecords();
 
         List<FindArchiveArticlePageListRspVO> vos = Lists.newArrayList();

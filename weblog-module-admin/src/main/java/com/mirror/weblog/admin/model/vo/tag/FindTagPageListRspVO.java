@@ -15,6 +15,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Builder
 public class FindTagPageListRspVO {
+
     /**
      * 标签 ID
      */
@@ -29,5 +30,10 @@ public class FindTagPageListRspVO {
      * 创建时间
      */
     private LocalDateTime createTime;
+
+    /**
+     * 文章总数
+     */
+    private Integer articlesTotal;
 
 }

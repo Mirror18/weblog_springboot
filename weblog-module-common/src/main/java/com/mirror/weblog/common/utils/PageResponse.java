@@ -11,7 +11,6 @@ import java.util.Objects;
  * @author mirror
  * @description: 分页响应参数工具类
  */
-@EqualsAndHashCode(callSuper = true)
 @Data
 public class PageResponse<T> extends Response<List<T>> {
 
@@ -38,7 +37,7 @@ public class PageResponse<T> extends Response<List<T>> {
     /**
      * 成功响应
      * @param page Mybatis Plus 提供的分页接口
-     * @param data 分页数据集合
+     * @param data
      * @return
      * @param <T>
      */
@@ -49,6 +48,19 @@ public class PageResponse<T> extends Response<List<T>> {
         response.setSize(Objects.isNull(page) ? 10L : page.getSize());
         response.setPages(Objects.isNull(page) ? 0L : page.getPages());
         response.setTotal(Objects.isNull(page) ? 0L : page.getTotal());
+        response.setData(data);
+        return response;
+    }
+
+    public static <T> PageResponse<T> success(long total, long current, long size, List<T> data) {
+        PageResponse<T> response = new PageResponse<>();
+        response.setSuccess(true);
+        response.setCurrent(current);
+        response.setSize(size);
+        // 计算总页数
+        int pages = (int) Math.ceil((double) total / size);
+        response.setPages(pages);
+        response.setTotal(total);
         response.setData(data);
         return response;
     }

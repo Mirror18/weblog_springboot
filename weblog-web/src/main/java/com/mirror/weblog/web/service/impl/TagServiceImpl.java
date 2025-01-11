@@ -15,6 +15,7 @@ import com.mirror.weblog.common.utils.Response;
 import com.mirror.weblog.web.convert.ArticleConvert;
 import com.mirror.weblog.web.model.vo.tag.FindTagArticlePageListReqVO;
 import com.mirror.weblog.web.model.vo.tag.FindTagArticlePageListRspVO;
+import com.mirror.weblog.web.model.vo.tag.FindTagListReqVO;
 import com.mirror.weblog.web.model.vo.tag.FindTagListRspVO;
 import com.mirror.weblog.web.service.TagService;
 import lombok.extern.slf4j.Slf4j;
@@ -26,6 +27,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+/**
+ * @author mirror
+ */
 @Service
 @Slf4j
 public class TagServiceImpl implements TagService {
@@ -43,17 +47,25 @@ public class TagServiceImpl implements TagService {
      * @return
      */
     @Override
-    public Response findTagList() {
-        // 查询所有标签
-        List<TagDO> tagDOS = tagMapper.selectList(Wrappers.emptyWrapper());
+    public Response findTagList(FindTagListReqVO findTagListReqVO) {
+        Long size = findTagListReqVO.getSize();
+
+        List<TagDO> tagDOS = null;
+        if (Objects.isNull(size) || size == 0) {
+            // 查询所有标签
+            tagDOS = tagMapper.selectList(Wrappers.emptyWrapper());
+        } else {
+            tagDOS = tagMapper.selectByLimit(size);
+        }
 
         // DO 转 VO
         List<FindTagListRspVO> vos = null;
-        if (!org.springframework.util.CollectionUtils.isEmpty(tagDOS)) {
+        if (!CollectionUtils.isEmpty(tagDOS)) {
             vos = tagDOS.stream()
                     .map(tagDO -> FindTagListRspVO.builder()
                             .id(tagDO.getId())
                             .name(tagDO.getName())
+                            .articlesTotal(tagDO.getArticlesTotal())
                             .build())
                     .collect(Collectors.toList());
         }
@@ -85,7 +97,7 @@ public class TagServiceImpl implements TagService {
         List<ArticleTagRelDO> articleTagRelDOS = articleTagRelMapper.selectByTagId(tagId);
 
         // 若该标签下未发布任何文章
-        if (org.springframework.util.CollectionUtils.isEmpty(articleTagRelDOS)) {
+        if (CollectionUtils.isEmpty(articleTagRelDOS)) {
             log.info("==> 该标签下还未发布任何文章, tagId: {}", tagId);
             return PageResponse.success(null, null);
         }

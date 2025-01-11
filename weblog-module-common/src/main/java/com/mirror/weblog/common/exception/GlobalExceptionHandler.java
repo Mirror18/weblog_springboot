@@ -32,19 +32,6 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * 其他类型异常
-     * @param request
-     * @param e
-     * @return
-     */
-    @ExceptionHandler({ Exception.class })
-    @ResponseBody
-    public Response<Object> handleOtherException(HttpServletRequest request, Exception e) {
-        log.error("{} request error, ", request.getRequestURI(), e);
-        return Response.fail(ResponseCodeEnum.SYSTEM_ERROR);
-    }
-
-    /**
      * 捕获参数校验异常
      * @return
      */
@@ -60,7 +47,7 @@ public class GlobalExceptionHandler {
         StringBuilder sb = new StringBuilder();
 
         // 获取校验不通过的字段，并组合错误信息，格式为： email 邮箱格式不正确, 当前值: '123124qq.com';
-        Optional.of(bindingResult.getFieldErrors()).ifPresent(errors -> {
+        Optional.ofNullable(bindingResult.getFieldErrors()).ifPresent(errors -> {
             errors.forEach(error ->
                     sb.append(error.getField())
                             .append(" ")
@@ -85,5 +72,18 @@ public class GlobalExceptionHandler {
         // 捕获到鉴权失败异常，主动抛出，交给 RestAccessDeniedHandler 去处理
         log.info("============= 捕获到 AccessDeniedException");
         throw e;
+    }
+
+    /**
+     * 其他类型异常
+     * @param request
+     * @param e
+     * @return
+     */
+    @ExceptionHandler({ Exception.class })
+    @ResponseBody
+    public Response<Object> handleOtherException(HttpServletRequest request, Exception e) {
+        log.error("{} request error, ", request.getRequestURI(), e);
+        return Response.fail(ResponseCodeEnum.SYSTEM_ERROR);
     }
 }

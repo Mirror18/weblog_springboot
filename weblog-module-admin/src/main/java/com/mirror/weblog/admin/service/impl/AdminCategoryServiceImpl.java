@@ -90,12 +90,13 @@ public class AdminCategoryServiceImpl implements AdminCategoryService {
 
         // DO 转 VO
         List<FindCategoryPageListRspVO> vos = null;
-        if (!org.springframework.util.CollectionUtils.isEmpty(categoryDOS)) {
+        if (!CollectionUtils.isEmpty(categoryDOS)) {
             vos = categoryDOS.stream()
                     .map(categoryDO -> FindCategoryPageListRspVO.builder()
                             .id(categoryDO.getId())
                             .name(categoryDO.getName())
                             .createTime(categoryDO.getCreateTime())
+                            .articlesTotal(categoryDO.getArticlesTotal())
                             .build())
                     .collect(Collectors.toList());
         }

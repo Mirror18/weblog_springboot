@@ -23,7 +23,7 @@ public class InitPVRecordScheduledTask {
     private StatisticsArticlePVMapper articlePVMapper;
 
     @Scheduled(cron = "0 0 23 * * ?") // 每天晚间 23 点执行
-    // @Scheduled(cron = "0 * * * * ?") // 每一分钟执行一次
+//     @Scheduled(cron = "0 * * * * ?") // 每一分钟执行一次
     public void execute() {
         // 定时任务执行的业务逻辑
         log.info("==> 开始执行初始化明日 PV 访问量记录定时任务");

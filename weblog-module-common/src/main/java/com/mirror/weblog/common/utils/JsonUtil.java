@@ -17,7 +17,9 @@ public class JsonUtil {
         try {
             return INSTANCE.writeValueAsString(obj);
         } catch (JsonProcessingException e) {
+            // todo Jackson 出参打印包含 Java 8 新日期出错问题
             return obj.toString();
         }
     }
+
 }

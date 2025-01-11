@@ -87,11 +87,12 @@ public class AdminTagServiceImpl extends ServiceImpl<TagMapper, TagDO> implement
 
         // do 转 vo
         List<FindTagPageListRspVO> vos = null;
-        if (!org.springframework.util.CollectionUtils.isEmpty(records)) {
+        if (!CollectionUtils.isEmpty(records)) {
             vos = records.stream().map(tagDO -> FindTagPageListRspVO.builder()
                     .id(tagDO.getId())
                     .name(tagDO.getName())
                     .createTime(tagDO.getCreateTime())
+                    .articlesTotal(tagDO.getArticlesTotal())
                     .build()).collect(Collectors.toList());
         }
 
@@ -138,7 +139,7 @@ public class AdminTagServiceImpl extends ServiceImpl<TagMapper, TagDO> implement
 
         // do 转 vo
         List<SelectRspVO> vos = null;
-        if (!org.springframework.util.CollectionUtils.isEmpty(tagDOS)) {
+        if (!CollectionUtils.isEmpty(tagDOS)) {
             vos = tagDOS.stream()
                     .map(tagDO -> SelectRspVO.builder()
                             .label(tagDO.getName())

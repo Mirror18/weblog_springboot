@@ -4,6 +4,9 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.google.common.collect.Lists;
 import com.mirror.weblog.admin.convert.ArticleDetailConvert;
+import com.mirror.weblog.admin.event.DeleteArticleEvent;
+import com.mirror.weblog.admin.event.PublishArticleEvent;
+import com.mirror.weblog.admin.event.UpdateArticleEvent;
 import com.mirror.weblog.admin.model.vo.article.*;
 import com.mirror.weblog.admin.service.AdminArticleService;
 import com.mirror.weblog.common.domain.dos.*;
@@ -15,6 +18,7 @@ import com.mirror.weblog.common.utils.PageResponse;
 import com.mirror.weblog.common.utils.Response;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -43,6 +47,8 @@ public class AdminArticleServiceImpl implements AdminArticleService {
     private TagMapper tagMapper;
     @Autowired
     private ArticleTagRelMapper articleTagRelMapper;
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
 
     /**
      * 发布文章
@@ -93,6 +99,9 @@ public class AdminArticleServiceImpl implements AdminArticleService {
         List<String> publishTags = publishArticleReqVO.getTags();
         insertTags(articleId, publishTags);
 
+        // 发送文章发布事件
+        eventPublisher.publishEvent(new PublishArticleEvent(this, articleId));
+
         return Response.success();
     }
 
@@ -119,6 +128,9 @@ public class AdminArticleServiceImpl implements AdminArticleService {
         // 4. 删除文章-标签关联记录
         articleTagRelMapper.deleteByArticleId(articleId);
 
+        // 发布文章删除事件
+        eventPublisher.publishEvent(new DeleteArticleEvent(this, articleId));
+
         return Response.success();
     }
 
@@ -136,21 +148,23 @@ public class AdminArticleServiceImpl implements AdminArticleService {
         String title = findArticlePageListReqVO.getTitle();
         LocalDate startDate = findArticlePageListReqVO.getStartDate();
         LocalDate endDate = findArticlePageListReqVO.getEndDate();
+        Integer type = findArticlePageListReqVO.getType();
 
         // 执行分页查询
-        Page<ArticleDO> articleDOPage = articleMapper.selectPageList(current, size, title, startDate, endDate);
+        Page<ArticleDO> articleDOPage = articleMapper.selectPageList(current, size, title, startDate, endDate, type);
 
         List<ArticleDO> articleDOS = articleDOPage.getRecords();
 
         // DO 转 VO
         List<FindArticlePageListRspVO> vos = null;
-        if (!org.springframework.util.CollectionUtils.isEmpty(articleDOS)) {
+        if (!CollectionUtils.isEmpty(articleDOS)) {
             vos = articleDOS.stream()
                     .map(articleDO -> FindArticlePageListRspVO.builder()
                             .id(articleDO.getId())
                             .title(articleDO.getTitle())
                             .cover(articleDO.getCover())
                             .createTime(articleDO.getCreateTime())
+                            .isTop(articleDO.getWeight() > 0)
                             .build())
                     .collect(Collectors.toList());
         }
@@ -253,6 +267,40 @@ public class AdminArticleServiceImpl implements AdminArticleService {
         List<String> publishTags = updateArticleReqVO.getTags();
         insertTags(articleId, publishTags);
 
+        // 发布文章修改事件
+        eventPublisher.publishEvent(new UpdateArticleEvent(this, articleId));
+
+        return Response.success();
+    }
+
+    /**
+     * 更新文章是否置顶
+     *
+     * @param updateArticleIsTopReqVO
+     * @return
+     */
+    @Override
+    public Response updateArticleIsTop(UpdateArticleIsTopReqVO updateArticleIsTopReqVO) {
+        Long articleId = updateArticleIsTopReqVO.getId();
+        Boolean isTop = updateArticleIsTopReqVO.getIsTop();
+
+        // 默认权重为 0
+        Integer weight = 0;
+        // 若设置为置顶
+        if (isTop) {
+            // 查询出表中最大的权重值
+            ArticleDO articleDO = articleMapper.selectMaxWeight();
+            Integer maxWeight = articleDO.getWeight();
+            // 最大权重值加一
+            weight = maxWeight + 1;
+        }
+
+        // 更新该篇文章的权重值
+        articleMapper.updateById(ArticleDO.builder()
+                .id(articleId)
+                .weight(weight)
+                .build());
+
         return Response.success();
     }
 
@@ -271,7 +319,7 @@ public class AdminArticleServiceImpl implements AdminArticleService {
         List<TagDO> tagDOS = tagMapper.selectList(Wrappers.emptyWrapper());
 
         // 如果表中还没有添加任何标签
-        if (org.springframework.util.CollectionUtils.isEmpty(tagDOS)) {
+        if (CollectionUtils.isEmpty(tagDOS)) {
             notExistTags = publishTags;
         } else {
             List<String> tagIds = tagDOS.stream().map(tagDO -> String.valueOf(tagDO.getId())).collect(Collectors.toList());
@@ -299,7 +347,7 @@ public class AdminArticleServiceImpl implements AdminArticleService {
         }
 
         // 将提交的上来的，已存在于表中的标签，文章-标签关联关系入库
-        if (!org.springframework.util.CollectionUtils.isEmpty(existedTags)) {
+        if (!CollectionUtils.isEmpty(existedTags)) {
             List<ArticleTagRelDO> articleTagRelDOS = Lists.newArrayList();
             existedTags.forEach(tagId -> {
                 ArticleTagRelDO articleTagRelDO = ArticleTagRelDO.builder()

@@ -77,6 +77,19 @@
             <artifactId>commonmark-ext-task-list-items</artifactId>
         </dependency>
 
+        <!-- <dependency> -->
+        <!--     <groupId>fr.brouillard.oss</groupId> -->
+        <!--     <artifactId>commonmark-ext-notifications</artifactId> -->
+        <!-- </dependency> -->
+        <!-- <dependency> -->
+        <!--     <groupId>org.springframework.boot</groupId> -->
+        <!--     <artifactId>spring-boot-starter-json</artifactId> -->
+        <!-- </dependency> -->
+        <!-- 敏感词过滤 -->
+        <dependency>
+            <groupId>io.github.toolgood</groupId>
+            <artifactId>toolgood-words</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

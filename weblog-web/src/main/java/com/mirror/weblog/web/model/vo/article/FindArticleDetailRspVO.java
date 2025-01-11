@@ -31,6 +31,12 @@ public class FindArticleDetailRspVO {
      * 发布时间
      */
     private LocalDateTime createTime;
+
+    /**
+     * 最后更新时间
+     */
+    private LocalDateTime updateTime;
+
     /**
      * 分类 ID
      */
@@ -55,4 +61,14 @@ public class FindArticleDetailRspVO {
      * 下一篇文章
      */
     private FindPreNextArticleRspVO nextArticle;
+
+    /**
+     * 总字数
+     */
+    private Integer totalWords;
+
+    /**
+     * 阅读时长
+     */
+    private String readTime;
 }
